@@ -23,21 +23,22 @@ public class GameController : MonoBehaviour {
 
     private string firstGuessPuzzle, secendGuesPuzzle;
 
+    GameObject[] objects;
+
     void Awake() {
         puzzles = Resources.LoadAll<Sprite>("Sprites/Puzzles");
+        objects = GameObject.FindGameObjectsWithTag("PuzzleButton");
     }
 
 	void Start () {
         GetButtons();
         AddListeners();
         AddGamePuzzles();
-        Shuffle(gamePuzzles);
-        gameGuess = gamePuzzles.Count / 2;
+
+        Restart();
     }
 
     void GetButtons() {
-        GameObject[] objects = GameObject.FindGameObjectsWithTag("PuzzleButton");
-
         for(int i = 0; i < objects.Length; i++) {
             btns.Add(objects[i].GetComponent<Button>());
             btns[i].image.sprite = bgImage;
@@ -62,7 +63,18 @@ public class GameController : MonoBehaviour {
             btn.onClick.AddListener(()=>PickAPuzzle());
         }
     }
-
+    public void Restart() {
+        Shuffle(gamePuzzles);
+        gameGuess = gamePuzzles.Count / 2;
+        countGuess = countCorrectGuess = 0;
+        for(int i = 0; i < objects.Length; i++) {
+            btns[i].image.sprite = bgImage;
+            btns[i].interactable = true;
+            btns[i].image.color = new Color(255,255,255,255);
+        }
+        firstGuess = false;
+        secendGuess = false;
+    }
     public void PickAPuzzle() {
         int puzzleName = int.Parse(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name);
 
@@ -89,29 +101,30 @@ public class GameController : MonoBehaviour {
 
     IEnumerator CheckIfPuzzlesMatch() {
         yield return new WaitForSeconds(1f);
+        if(firstGuess && secendGuess) {
+            if(firstGuessPuzzle == secendGuesPuzzle) {
+                yield return new WaitForSeconds(.5f);
 
-        if(firstGuessPuzzle == secendGuesPuzzle) {
+                btns[firstGuessIndex].interactable = false;
+                btns[secendGuessIndex].interactable = false;
+
+                btns[firstGuessIndex].image.color = new Color(0,0,0,0);
+                btns[secendGuessIndex].image.color = new Color(0,0,0,0);
+
+                CheckIfGameFinished();
+            } else {
+                yield return new WaitForSeconds(.5f);
+
+                btns[firstGuessIndex].interactable = true;
+                btns[secendGuessIndex].interactable = true;
+
+                btns[firstGuessIndex].image.sprite = bgImage;
+                btns[secendGuessIndex].image.sprite = bgImage;
+            }
             yield return new WaitForSeconds(.5f);
 
-            btns[firstGuessIndex].interactable = false;
-            btns[secendGuessIndex].interactable = false;
-
-            btns[firstGuessIndex].image.color = new Color(0,0,0,0);
-            btns[secendGuessIndex].image.color = new Color(0,0,0,0);
-
-            CheckIfGameFinished();
-        } else {
-            yield return new WaitForSeconds(.5f);
-
-            btns[firstGuessIndex].interactable = true;
-            btns[secendGuessIndex].interactable = true;
-
-            btns[firstGuessIndex].image.sprite = bgImage;
-            btns[secendGuessIndex].image.sprite = bgImage;
+            firstGuess = secendGuess = false;
         }
-        yield return new WaitForSeconds(.5f);
-
-        firstGuess = secendGuess = false;
     }
 
     void CheckIfGameFinished() {
