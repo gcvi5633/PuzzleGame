@@ -8,6 +8,7 @@ public class GameController : MonoBehaviour {
     [SerializeField]
     private Sprite bgImage;
 
+    public Button restartBtn;
     public Text text;
     public Sprite[] puzzles;
 
@@ -67,6 +68,7 @@ public class GameController : MonoBehaviour {
     public void Restart() {
         Shuffle(gamePuzzles);
         text.gameObject.SetActive(false);
+        restartBtn.gameObject.SetActive(false);
         gameGuess = gamePuzzles.Count / 2;
         countGuess = countCorrectGuess = 0;
         for(int i = 0; i < objects.Length; i++) {
@@ -135,6 +137,7 @@ public class GameController : MonoBehaviour {
         if(countCorrectGuess == gameGuess) {
             string finishText = "Game Finished!\n"  + "You Took " + countGuess + " Time(s) To Finished!";
             text.gameObject.SetActive(true);
+            restartBtn.gameObject.SetActive(true);
             text.text = finishText;
             //Debug.Log("Game Finished!");
             //Debug.Log("You Took " + countGuess + " Time(s) To Finished!");
